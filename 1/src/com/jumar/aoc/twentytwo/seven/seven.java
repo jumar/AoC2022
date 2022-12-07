@@ -2,7 +2,10 @@ package com.jumar.aoc.twentytwo.seven;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class seven {
 
@@ -68,7 +71,7 @@ public class seven {
 				} else {
 					// move in child folder
 					curr.children.forEach(child -> {
-						if (child.data.aName.equals(targetDir)) {
+						if (child.data.name.equals(targetDir)) {
 							curr = child;
 						}
 					});
@@ -95,15 +98,54 @@ public class seven {
 		// problem: find all dirs with size < 100_000. Compute the total size of these
 
 //		Path data = Path.of("./data/7.txt");
-		Path data = Path.of("./data/7test.txt");
+		Path data = Path.of("./data/7.txt");
 		reader = new DataReader(data);
 		var cmd = reader.readCmd();
 		while (cmd != enCMD.NONE) {
 			cmd.execute();
 			cmd = reader.readCmd();
 		}
-		printTree();
-		// TODO compute size while printing
+		//printTree();
+		computeSize();
+		printTree(); // Yay!
+		var nodes = identifySmallerThan(100_000);
+		Integer size = nodes.stream().map(n -> n.data.size).collect(Collectors.summingInt(val -> (Integer)val));
+		System.out.println("Total size of elems with size at most 100_000: " + size);
+		}
+
+	private static List<TreeNode<Data>> identifySmallerThan(int higherLimit) {
+		List<TreeNode<Data>> nodes = new ArrayList<>();
+		for (TreeNode<Data> node : root) {
+			if(node.data.size <= higherLimit&& !node.isLeaf()) { // only count the dirs
+				nodes.add(node);
+			}
+		}
+		return nodes;
+	}
+
+	private static void computeSize() {
+		for (TreeNode<Data> node : root) {
+			if(node.isLeaf()) {
+				// either a file or an empty dir
+				int nodeSize = node.data.size;
+				if(nodeSize!=Data.UNKNOWN_SIZE) {
+					// it's a file we already have its size
+					// lets propagate its size to its parents
+					propagateSizeToParents(node, nodeSize); 
+				}
+			} else {
+				// it's a non empty dir
+				// do nothing
+			}
+			//System.out.println(indent + node.data);
+		}
+		
+	}
+
+	private static void propagateSizeToParents(TreeNode<Data> node, int nodeSize) {
+		node.parent.data.size += nodeSize;
+		if(!node.parent.isRoot())
+			propagateSizeToParents(node.parent, nodeSize);
 	}
 
 	private static void printTree() {

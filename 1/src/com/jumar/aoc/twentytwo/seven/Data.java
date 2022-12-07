@@ -1,13 +1,13 @@
 package com.jumar.aoc.twentytwo.seven;
 
 public class Data {
-	public String aName;
-	public int aSize;
-	public static final int UNKNOWN_SIZE = -1;
+	public String name;
+	public int size;
+	public static final int UNKNOWN_SIZE = 0;
 
 	public Data(String name, int size) {
-		aName = name;
-		aSize = size;
+		this.name = name;
+		this.size = size;
 	}
 
 	public Data(String name) {
@@ -16,6 +16,6 @@ public class Data {
 
 	@Override
 	public String toString() {
-		return aName + " {" + aSize + "}";
+		return name + " {" + size + "}";
 	}
 }

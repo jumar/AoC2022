@@ -1,7 +1,7 @@
 package com.jumar.aoc.twentytwo.seven;
 
 import java.util.Iterator;
-
+// I took this class from gitHub somewhere
 public class TreeNodeIter<T> implements Iterator<TreeNode<T>> {
 
 	enum ProcessStages {
