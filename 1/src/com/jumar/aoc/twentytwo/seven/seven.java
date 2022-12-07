@@ -4,6 +4,8 @@ import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,9 +98,16 @@ public class seven {
 		// Need to ID the dirs with the largest files
 
 		// problem: find all dirs with size < 100_000. Compute the total size of these
-
-//		Path data = Path.of("./data/7.txt");
+		//
+		
+		// part 2: 
+		// available disk space 70_000_000
+		// need 30_000_000 for update
+		// find dir to delete to get enough space (8_381_165)
+		
+		
 		Path data = Path.of("./data/7.txt");
+//		Path data = Path.of("./data/7test.txt");
 		reader = new DataReader(data);
 		var cmd = reader.readCmd();
 		while (cmd != enCMD.NONE) {
@@ -111,7 +120,24 @@ public class seven {
 		var nodes = identifySmallerThan(100_000);
 		Integer size = nodes.stream().map(n -> n.data.size).collect(Collectors.summingInt(val -> (Integer)val));
 		System.out.println("Total size of elems with size at most 100_000: " + size);
-		}
+		int updateSpace = 30_000_000;
+		int totalSpace = 70_000_000;
+		int usedSpace = root.data.size;
+		int freeSpace = totalSpace-usedSpace;
+		int neededSpace = Math.abs(freeSpace - updateSpace);
+		System.out.println("Elems with size at least " + neededSpace);
+		nodes = identifyLargerThan(neededSpace);
+		Collections.sort(nodes, new Comparator<TreeNode<Data>>() {
+			@Override
+			public int compare(TreeNode<Data> o1, TreeNode<Data> o2) {
+				return ((Integer)o1.data.size).compareTo((Integer)o2.data.size);
+			}
+		});
+		nodes.stream().filter(n -> 
+			n.data.size >= neededSpace
+		).forEach(c -> System.out.println("cc: " +c));//.collect(Collectors.toList());
+		// wcmwrtjn <- no
+	}
 
 	private static List<TreeNode<Data>> identifySmallerThan(int higherLimit) {
 		List<TreeNode<Data>> nodes = new ArrayList<>();
@@ -123,6 +149,16 @@ public class seven {
 		return nodes;
 	}
 
+	private static List<TreeNode<Data>> identifyLargerThan(int higherLimit) {
+		List<TreeNode<Data>> nodes = new ArrayList<>();
+		for (TreeNode<Data> node : root) {
+			if(node.data.size >= higherLimit&& !node.isLeaf()) { // only count the dirs
+				nodes.add(node);
+			}
+		}
+		return nodes;
+	}
+	
 	private static void computeSize() {
 		for (TreeNode<Data> node : root) {
 			if(node.isLeaf()) {
