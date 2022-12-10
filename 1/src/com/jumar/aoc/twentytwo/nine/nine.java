@@ -12,6 +12,7 @@ import java.util.StringTokenizer;
 public class nine {
 
 	private static final int SIZE = 500;
+	private static final boolean debug = false;
 	private static Pos[][] board;
 
 	public static void main(String[] args) {
@@ -36,7 +37,10 @@ public class nine {
 		// 5 create a big-ass board and start at the center
 		// 6 at the end of each move plus first location, update visited Pos
 
+		// part 2 -> extend to a rope with 10 knots
+
 //		Path data = Path.of("./data/9test.txt");
+//		Path data = Path.of("./data/9test1.txt");
 		Path data = Path.of("./data/9.txt");
 		int count = 0;
 		List<Movement> lines = loadData(data);
@@ -49,46 +53,66 @@ public class nine {
 			}
 		}
 		Pos start = new Pos(SIZE / 2, SIZE / 2);
-		RopeEnd head = new RopeEnd(start);
-		RopeEnd tail = new RopeEnd(start);
+		// create rope
+		List<RopeKnot> rope = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			rope.add(new RopeKnot(i, start));
+		}
+		RopeKnot head = rope.get(0);
+		RopeKnot tail = rope.get(rope.size() - 1);
 		updateTrail(board, tail);
-		// printBoard(head, tail);
+		printBoard(rope);
 		lines.forEach(mov -> {
+			if (debug)
+				System.out.println(mov.dir + " " + mov.count);
 			switch (mov.dir) {
 			case "U":
 				for (int i = 0; i < mov.count; i++) {
 					head.moveUp();
-					tail.follow(head);
+					if (debug)
+						printBoard(rope);
+					followHead(rope);
 					updateTrail(board, tail);
-//					printBoard(head, tail);
+					if (debug)
+						printBoard(rope);
 				}
 				break;
 			case "D":
 				for (int i = 0; i < mov.count; i++) {
 					head.moveDown();
-					tail.follow(head);
+					if (debug)
+						printBoard(rope);
+					followHead(rope);
 					updateTrail(board, tail);
-//					printBoard(head, tail);
+					if (debug)
+						printBoard(rope);
 				}
 				break;
 			case "L":
 				for (int i = 0; i < mov.count; i++) {
 					head.moveLeft();
-					tail.follow(head);
+					if (debug)
+						printBoard(rope);
+					followHead(rope);
 					updateTrail(board, tail);
-//					printBoard(head, tail);
+					if (debug)
+						printBoard(rope);
 				}
 				break;
 			case "R":
 				for (int i = 0; i < mov.count; i++) {
 					head.moveRight();
-					tail.follow(head);
+					if (debug)
+						printBoard(rope);
+					followHead(rope);
 					updateTrail(board, tail);
-//					printBoard(head, tail);
+					if (debug)
+						printBoard(rope);
 				}
 				break;
 			}
-
+			if (debug)
+				printBoard(rope);
 		});
 
 		// find pos visited by tail
@@ -98,27 +122,39 @@ public class nine {
 					count++;
 			}
 		}
-		printBoard(head, tail);
+		printBoard(rope);
 		System.out.println("Nb of visited pos: " + count);
-
-		// This one took some debugging!!
+		// 4783 too high
 	}
 
-	private static void printBoard(Pos head, Pos tail) {
-		for (int r = 0; r < SIZE; r++) {
-			for (int c = 0; c < SIZE; c++) {
-				if (board[r][c].equals(tail))
-					System.out.print("T");
-				else if (new Pos(r, c) == head)
-					System.out.print("H");
-				else
-					System.out.print(board[r][c].tailVisitCount > 0 ? board[r][c].tailVisitCount : ".");
-			}
-			System.out.println("");
+	private static void followHead(List<RopeKnot> rope) {
+		for (int j = 1; j < rope.size(); j++) {
+			rope.get(j).follow(rope.get(j - 1));
 		}
 	}
 
-	private static void updateTrail(Pos[][] board, RopeEnd tail) {
+	private static void printBoard(List<RopeKnot> rope) {
+		for (int r = 0; r < SIZE; r++) {
+			for (int c = 0; c < SIZE; c++) {
+				boolean ok = false;
+				for (int k = 0; k < rope.size(); k++) {
+					RopeKnot knot = rope.get(k);
+					if (knot.r == r && knot.c == c) {
+						if (!ok) {
+							System.out.print(knot);
+							ok = true;
+						}
+					}
+				}
+				if (!ok)
+					System.out.print(board[r][c].tailVisitCount > 0 ? "#" : ".");
+			}
+			System.out.println("");
+		}
+		System.out.println("");
+	}
+
+	private static void updateTrail(Pos[][] board, RopeKnot tail) {
 		board[tail.r][tail.c].tailVisitCount++;
 	}
 

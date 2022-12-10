@@ -15,23 +15,23 @@ class Pos {
 	}
 
 	public void moveUp() {
-		r++;
-		System.out.println(this);
+		r--;
+//		System.out.println(this);
 	}
 
 	public void moveDown() {
-		r--;
-		System.out.println(this);
+		r++;
+//		System.out.println(this);
 	}
 
 	public void moveRight() {
 		c++;
-		System.out.println(this);
+//		System.out.println(this);
 	}
 
 	public void moveLeft() {
 		c--;
-		System.out.println(this);
+//		System.out.println(this);
 	}
 
 	public boolean isNeighbor(Pos other) {
