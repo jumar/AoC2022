@@ -38,6 +38,7 @@ public class twelve {
 		// find starter and target tiles and add nodes to graph
 		Tile start = null;
 		Tile target = null;
+		List<Tile> aTiles = new ArrayList<>();
 		for (int r = 0; r < terrain.length; r++) {
 			for (int c = 0; c < terrain[0].length; c++) {
 				Tile tile = terrain[r][c];
@@ -46,6 +47,8 @@ public class twelve {
 					start = tile;
 				else if (tile.isTarget)
 					target = tile;
+				if (tile.h == 1)
+					aTiles.add(tile);
 			}
 		}
 		var targetF = target;
@@ -68,11 +71,20 @@ public class twelve {
 			System.out.println("==============Breath First==============");
 			Traverser.forGraph(g).breadthFirst(start).forEach(x -> System.out.println(x));
 		}
-		calculateShortestPathFromSource(g, start);
-		Traverser.forGraph(g).depthFirstPostOrder(start).forEach(x -> {
-			if (x == targetF)
-				System.out.println(x.toLongString());
-		});
+		int[] shortest = new int[] { Integer.MAX_VALUE };
+		for (var t : aTiles) {
+
+			calculateShortestPathFromSource(g, t);
+			Traverser.forGraph(g).depthFirstPostOrder(t).forEach(x -> {
+
+				if (x == targetF) {
+					System.out.println(x.toLongString());
+					if (x.distance < shortest[0])
+						shortest[0] = x.distance;
+				}
+			});
+		}
+		System.out.println("Shortest path: " + shortest[0]);
 //		Player p = new Player(start);
 //		p.findPathTo(target, terrain);
 	}
