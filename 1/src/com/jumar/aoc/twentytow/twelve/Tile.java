@@ -2,6 +2,7 @@ package com.jumar.aoc.twentytow.twelve;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -46,6 +47,9 @@ public class Tile {
 	public final String hs;
 	public boolean isStart;
 	public boolean isTarget;
+	public List<Tile> shortestPath = new LinkedList<>();
+
+	Integer distance = Integer.MAX_VALUE;
 
 	public Tile(String s, int r2, int c2) {
 		hs = s;
@@ -60,11 +64,15 @@ public class Tile {
 	}
 
 	private boolean isTooSteep(Tile t) {
-		return t.h - h > 1;
+		return Math.abs(t.h - h) > 1;
+	}
+
+	private boolean isReachable(Tile t) {
+		return (t.h == h + 1) || t.h == h || t.h < h;
 	}
 
 	public boolean canGoto(Tile t) {
-		return t.isNeighbor(this) && !isTooSteep(t);
+		return t.isNeighbor(this) && isReachable(t);// !isTooSteep(t);
 	}
 
 	public List<Tile> getAvailableDirections(Tile[][] terrain) {
@@ -101,7 +109,16 @@ public class Tile {
 //				+ "]";
 	}
 
+	public String toLongString() {
+		return hs + "{" + String.format("%02d", r) + ";" + String.format("%02d", c) + "}-d=" + distance
+				+ "-shortestPath:" + shortestPath;
+	}
+
 	public boolean isNeighbor(Tile other) {
 		return (other.r == r && (Math.abs(other.c - c) == 1)) || (other.c == c && (Math.abs(other.r - r) == 1));
+	}
+
+	public int getDistance() {
+		return distance;
 	}
 }

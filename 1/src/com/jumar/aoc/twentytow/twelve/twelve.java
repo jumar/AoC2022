@@ -6,7 +6,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+
+import com.google.common.graph.MutableValueGraph;
+import com.google.common.graph.Traverser;
+import com.google.common.graph.ValueGraphBuilder;
 
 public class twelve {
 
@@ -19,60 +26,101 @@ public class twelve {
 	// step=1 square LRUP at most 1 higher but no limit down
 	//
 	//
-	private static final boolean debug = true;
+	private static final boolean debug = false;
 
 	public static void main(String[] args) {
 
-		Path data = Path.of("./data/12test.txt");
-//		Path data = Path.of("./data/12.txt");
+//		Path data = Path.of("./data/12test.txt");
+		Path data = Path.of("./data/12.txt");
 		Tile[][] terrain = loadData(data);
-		// find planer and target tiles
+		// buid graph
+		MutableValueGraph<Tile, Integer> g = ValueGraphBuilder.directed().allowsSelfLoops(false).build();
+		// find starter and target tiles and add nodes to graph
 		Tile start = null;
 		Tile target = null;
 		for (int r = 0; r < terrain.length; r++) {
 			for (int c = 0; c < terrain[0].length; c++) {
 				Tile tile = terrain[r][c];
+				g.addNode(tile);
 				if (tile.isStart)
 					start = tile;
 				else if (tile.isTarget)
 					target = tile;
 			}
 		}
-
-		if (debug)
+		var targetF = target;
+		// add edges to graph
+		for (int r = 0; r < terrain.length; r++) {
+			for (int c = 0; c < terrain[0].length; c++) {
+				Tile tile = terrain[r][c];
+				tile.getAvailableDirections(terrain).forEach(t -> {
+//					if (debug)
+					System.out.println("edge: " + tile + "->" + t);
+					g.putEdgeValue(tile, t, 1);
+				});
+			}
+		}
+		if (debug) {
 			printTerrain(terrain, start);
-		Player p = new Player(start);
-		p.findPathTo(target, terrain);
+			System.out.println("==============Dept First==============");
+			Traverser.forGraph(g).depthFirstPostOrder(start).forEach(x -> System.out.println(x));
+			// Print the nodes Bread First
+			System.out.println("==============Breath First==============");
+			Traverser.forGraph(g).breadthFirst(start).forEach(x -> System.out.println(x));
+		}
+		calculateShortestPathFromSource(g, start);
+		Traverser.forGraph(g).depthFirstPostOrder(start).forEach(x -> {
+			if (x == targetF)
+				System.out.println(x.toLongString());
+		});
+//		Player p = new Player(start);
+//		p.findPathTo(target, terrain);
+	}
 
-//		System.out.println(monkeys.toString().replace("],", "]\n"));
-//		for (int i = 1; i <= 20; i++) {
-//			monkeys.forEach(m -> {
-//				int size = m.items.size();
-//				for (int j = 0; j < size; j++) {
-//					m.inspect();
-//					var item = m.items.remove(0);
-//					BigInteger val = m.operation.apply(item).divide(BigInteger.valueOf(3)); // <--
-//					if (m.test.test(val)) {
-//						if (debug)
-//							System.out.println("Addidn " + val + " to " + m.targetTrue);
-//						monkeys.get(m.targetTrue).items.add(val);
-//					} else {
-//						if (debug)
-//							System.out.println("Addidn " + val + " to " + m.targetFalse);
-//						monkeys.get(m.targetFalse).items.add(val);
-//					}
-//				}
-//			});
-//			if (debug || i == 1 || i == 2 || i == 1000) {
-//				System.out.println(i + "\n" + monkeys.toString().replace("],", "]\n"));
-//				monkeys.forEach(m -> System.out.println(m.id + " instpected " + m.count));
-//			}
-//			System.out.println(i);
-//		}
-//		System.out.println("\n" + monkeys.toString().replace("],", "]\n"));
-//		monkeys.forEach(m -> System.out.println(m.id + " instpected " + m.count));
-//		var list = monkeys.stream().map(m -> m.count).collect(Comparators.greatest(2, Integer::compareTo));
-//		System.out.println(list.get(0) * list.get(1));
+	public static MutableValueGraph<Tile, Integer> calculateShortestPathFromSource(MutableValueGraph<Tile, Integer> g,
+			Tile source) {
+		source.distance = 0;
+
+		Set<Tile> settledNodes = new HashSet<>();
+		Set<Tile> unsettledNodes = new HashSet<>();
+
+		unsettledNodes.add(source);
+		while (unsettledNodes.size() != 0) {
+			Tile currentNode = getLowestDistanceNode(unsettledNodes);
+			unsettledNodes.remove(currentNode);
+			for (var adjacentNode : g.successors(currentNode)) {
+				if (!settledNodes.contains(adjacentNode)) {
+					calculateMinimumDistance(adjacentNode, g.edgeValueOrDefault(currentNode, adjacentNode, 1),
+							currentNode);
+					unsettledNodes.add(adjacentNode);
+				}
+			}
+			settledNodes.add(currentNode);
+		}
+		return g;
+	}
+
+	private static void calculateMinimumDistance(Tile evaluationNode, Integer edgeWeigh, Tile sourceNode) {
+		Integer sourceDistance = sourceNode.getDistance();
+		if (sourceDistance + edgeWeigh < evaluationNode.getDistance()) {
+			evaluationNode.distance = sourceDistance + edgeWeigh;
+			LinkedList<Tile> shortestPath = new LinkedList<>(sourceNode.shortestPath);
+			shortestPath.add(sourceNode);
+			evaluationNode.shortestPath = shortestPath;
+		}
+	}
+
+	private static Tile getLowestDistanceNode(Set<Tile> unsettledNodes) {
+		Tile lowestDistanceNode = null;
+		int lowestDistance = Integer.MAX_VALUE;
+		for (Tile node : unsettledNodes) {
+			int nodeDistance = node.getDistance();
+			if (nodeDistance < lowestDistance) {
+				lowestDistance = nodeDistance;
+				lowestDistanceNode = node;
+			}
+		}
+		return lowestDistanceNode;
 	}
 
 	public static void printTerrain(Tile[][] terrain, Tile curNode) {
