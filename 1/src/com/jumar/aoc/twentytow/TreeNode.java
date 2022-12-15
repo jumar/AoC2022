@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 // I took this class from gitHub somewhere
-public class TreeNode<T> implements Iterable<TreeNode<T>> {
+public class TreeNode<T extends Comparable<T>> implements Iterable<TreeNode<T>> {
 
 	public T data;
 	public TreeNode<T> parent;
@@ -61,7 +61,12 @@ public class TreeNode<T> implements Iterable<TreeNode<T>> {
 
 	@Override
 	public String toString() {
-		return data != null ? data.toString() : "[data null]";
+		StringBuffer b = new StringBuffer();
+		for (int i = 0; i < getLevel(); i++) {
+			b.append("-");
+		}
+		b.append(data != null ? data.toString() : "[data null]");
+		return b.toString();
 	}
 
 	@Override

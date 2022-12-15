@@ -1,11 +1,7 @@
 package com.jumar.aoc.twentytow.thirteen;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Elem implements Comparable<Elem> {
 	StringBuffer buff;
-	List<Elem> subElems = new ArrayList<>();
 
 	public Elem() {
 		buff = new StringBuffer();
@@ -13,7 +9,7 @@ public class Elem implements Comparable<Elem> {
 
 	@Override
 	public String toString() {
-		return subElems.isEmpty() ? ("[" + buff.toString() + "]") : subElems.toString();
+		return "[" + buff.toString() + "]";
 	}
 
 	public void append(String s) {
@@ -47,30 +43,28 @@ public class Elem implements Comparable<Elem> {
 		}
 	}
 
-	public void add(Elem newElem) {
-		subElems.add(newElem);
-	}
-
 	@Override
 	public int compareTo(Elem o) {
-		// TODO Auto-generated method stub
-		if (subElems.isEmpty() && o.subElems.isEmpty()) { // both are integers
-			return buff.toString().compareTo(o.buff.toString());
-		}
-		if (subElems.isEmpty() && !o.subElems.isEmpty()) { // 1st is integer, 2nd is list
-			// change 1st to a list
-			return buff.toString().compareTo(o.buff.toString());
-
-		}
-		if (!subElems.isEmpty() && o.subElems.isEmpty()) { // 1st is list, 2nd is integer
-			// change 2nd to list
-			return buff.toString().compareTo(o.buff.toString());
-		}
-		if (!subElems.isEmpty() && !o.subElems.isEmpty()) { // both are lists
-			// here we recurse?
-			return buff.toString().compareTo(o.buff.toString());
-		}
-		throw new UnsupportedOperationException("Boom!");
+		int cmp = buff.toString().compareTo(o.buff.toString());
+		if (cmp <= 0 && buff.toString().length() > o.buff.toString().length())
+			return -10_000;
+		return cmp;
+//		// TODO Auto-generated method stub
+//		if (subElems.isEmpty() && o.subElems.isEmpty()) { // both are integers
+//			return buff.toString().compareTo(o.buff.toString());
+//		}
+//		if (subElems.isEmpty() && !o.subElems.isEmpty()) { // 1st is integer, 2nd is list
+//			// change 1st to a list
+//			return buff.toString().compareTo(o.buff.toString());
+//		}
+//		if (!subElems.isEmpty() && o.subElems.isEmpty()) { // 1st is list, 2nd is integer
+//			// change 2nd to list
+//			return buff.toString().compareTo(o.buff.toString());
+//		}
+//		if (!subElems.isEmpty() && !o.subElems.isEmpty()) { // both are lists
+//			// here we recurse?
+//			return buff.toString().compareTo(o.buff.toString());
+//		}
+//		throw new UnsupportedOperationException("Boom!");
 	}
-
 }

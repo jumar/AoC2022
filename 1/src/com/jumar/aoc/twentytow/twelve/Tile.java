@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Tile {
+public class Tile implements Comparable<Tile> {
 
 	static Map<String, Integer> heightMap = new HashMap<>();
 	static {
@@ -120,5 +120,11 @@ public class Tile {
 
 	public int getDistance() {
 		return distance;
+	}
+
+	@Override
+	public int compareTo(Tile o) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

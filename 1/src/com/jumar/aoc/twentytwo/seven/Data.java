@@ -1,6 +1,6 @@
 package com.jumar.aoc.twentytwo.seven;
 
-public class Data {
+public class Data implements Comparable<Data> {
 	public String name;
 	public int size;
 	public static final int UNKNOWN_SIZE = 0;
@@ -17,5 +17,11 @@ public class Data {
 	@Override
 	public String toString() {
 		return name + " {" + size + "}";
+	}
+
+	@Override
+	public int compareTo(Data o) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

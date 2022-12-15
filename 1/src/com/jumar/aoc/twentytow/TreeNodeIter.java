@@ -3,7 +3,7 @@ package com.jumar.aoc.twentytow;
 import java.util.Iterator;
 
 // I took this class from gitHub somewhere
-public class TreeNodeIter<T> implements Iterator<TreeNode<T>> {
+public class TreeNodeIter<T extends Comparable<T>> implements Iterator<TreeNode<T>> {
 
 	enum ProcessStages {
 		ProcessParent, ProcessChildCurNode, ProcessChildSubNode

@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
 
+import com.jumar.aoc.twentytow.TreeNode;
+
 public class twelve {
 
 	// received distress signal
@@ -27,28 +29,46 @@ public class twelve {
 
 	public static void main(String[] args) {
 
-		Path data = Path.of("./data/13test.txt");
-//		Path data = Path.of("./data/13.txt");
+//		Path data = Path.of("./data/13test.txt");
+		Path data = Path.of("./data/13.txt");
 		List<Pair<Packet>> pairs = loadData(data);
 		List<Integer> idexList = new ArrayList<>();
 		for (int i = 0; i < pairs.size(); i++) {
 			Pair<Packet> pair = pairs.get(i);
 			if (debug)
 				System.out.println(pair);
-
+			System.out.println("-------------------");
 			var v0 = parseElems(pair.left.line);
-			System.out.print(v0 + "-");
+			v0.iterator().forEachRemaining(n -> System.out.println(n));
 			var v1 = parseElems(pair.right.line);
-			System.out.println(v1);
-			if (v0.compareTo(v1) <= 0) {
-				idexList.add(i + 1);
+			v1.iterator().forEachRemaining(n -> System.out.println(n));
+			System.out.println("-------------------");
+			boolean res = true;
+			if (i == 6)
+				System.out.println();
+			int compareTo = 0;
+			for (int j = 0; j < v0.size() && j < v1.size(); j++) {
+				System.out.println("cmp " + v0.get(j) + "~" + v1.get(j));
+				compareTo = v0.get(j).compareTo(v1.get(j));
+				if (compareTo <= 0) {
+					System.out.println("yes");
+					res &= true;
+				} else {
+					System.out.println("no");
+					res &= false;
+					break;
+				}
 			}
-			if (pair.isCorrectOrder()) {
+			if (res && v0.size() > v1.size() && !(compareTo == -10_000))
+				res = false;
+			if (res) {
+				System.out.println("----------------?adding " + (i + 1));
 				idexList.add(i + 1);
 			}
 		}
 		Optional<Integer> sum = idexList.stream().reduce((x, y) -> x + y);
 		sum.ifPresentOrElse(val -> System.out.println("Sum= " + val), () -> System.out.println("Rien"));
+		// 836 too low
 	}
 
 	private static List<Pair<Packet>> loadData(Path data) {
@@ -57,6 +77,7 @@ public class twelve {
 		try (BufferedReader reader = new BufferedReader(new FileReader(data.toFile()))) {
 			String text = reader.readLine();
 			while (text != null) {
+//				JSONParser
 				Packet l = new Packet(text);
 				// next line
 				text = reader.readLine();
@@ -78,7 +99,7 @@ public class twelve {
 		return pairs;
 	}
 
-	public static Elem parseElems(String mydata) {
+	public static List<Elem> parseElems(String mydata) {
 		List<Elem> elems = new ArrayList<>();
 //		// find all [
 ////		Stack<Integer> openBracketsId = new Stack<>();
@@ -121,7 +142,9 @@ public class twelve {
 		// when you find a , you append to current elem
 		Stack<Elem> stack = new Stack<>();
 		Elem currElem = null;
-		Elem rootElem = null;
+		TreeNode<Elem> rootTreeElem = new TreeNode<Elem>(new Elem());
+		TreeNode<Elem> newTreeElem = null;
+		TreeNode<Elem> currTreeElem = rootTreeElem;
 		Integer rawVal = 0;
 		char ascii = '~';
 		StringBuffer numberBuff = new StringBuffer();
@@ -140,18 +163,15 @@ public class twelve {
 						throw new UnsupportedOperationException("too big");
 					ascii = (char) (rawVal + 65);
 					currElem.append(ascii);
+//					currElem.append(numberBuff.toString());
 					// start new number
 					numberBuff = new StringBuffer();
 				}
 				if (c == '[') {
 					// open elem
 					Elem newElem = new Elem();
-					if (rootElem == null)
-						rootElem = newElem;
-					if (currElem != null) {
-						currElem.add(newElem);
-						stack.add(currElem);
-					}
+					currTreeElem = currTreeElem.addChild(newElem);
+					stack.add(currElem);
 					currElem = newElem;
 				} else if (c == ',') {
 					// c'est chill on reste dans le meme elem
@@ -161,13 +181,15 @@ public class twelve {
 					if (!stack.isEmpty()) {
 						elems.add(currElem);
 						currElem = stack.pop();
-					} else
+						currTreeElem = currTreeElem.parent;
+					} else if (currElem != null)
 						elems.add(currElem);
 				}
 			}
 
 		}
-		return rootElem;
+		return elems;
+//		return rootTreeElem;
 	}
 
 	private static Integer getDigit(char c) {
