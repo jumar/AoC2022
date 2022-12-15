@@ -1,6 +1,6 @@
 package com.jumar.aoc.twentytow.thirteen;
 
-public class Pair<P extends Comparable<P>> {
+public class Pair<P> {
 	public P left;
 	public P right;
 
@@ -12,9 +12,5 @@ public class Pair<P extends Comparable<P>> {
 	@Override
 	public String toString() {
 		return left + "~" + right;
-	}
-
-	public boolean isCorrectOrder() {
-		return left.compareTo(right) <= 0;
 	}
 }

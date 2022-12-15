@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.jumar.aoc.twentytow.TreeNode;
 
 public class twelve {
@@ -29,27 +33,33 @@ public class twelve {
 
 	public static void main(String[] args) {
 
-//		Path data = Path.of("./data/13test.txt");
-		Path data = Path.of("./data/13.txt");
-		List<Pair<Packet>> pairs = loadData(data);
+		Path data = Path.of("./data/13test.txt");
+//		Path data = Path.of("./data/13.txt");
+		List<Pair<JsonElement>> pairs = loadData(data);
 		List<Integer> idexList = new ArrayList<>();
-		for (int i = 0; i < pairs.size(); i++) {
-			Pair<Packet> pair = pairs.get(i);
+		for (int i = 1; i <= pairs.size(); i++) {
+			Pair<JsonElement> pair = pairs.get(i - 1);
 			if (debug)
 				System.out.println(pair);
 			System.out.println("-------------------");
-			var v0 = parseElems(pair.left.line);
-			v0.iterator().forEachRemaining(n -> System.out.println(n));
-			var v1 = parseElems(pair.right.line);
-			v1.iterator().forEachRemaining(n -> System.out.println(n));
+			JsonArray leftJsonArray = pair.left.getAsJsonArray();
+			System.out.println(leftJsonArray.asList());
+			JsonArray rightJsonArray = pair.right.getAsJsonArray();
+			System.out.println(rightJsonArray.asList());
+//			var v0 = parseElems(pair.left.line);
+//			v0.iterator().forEachRemaining(n -> System.out.println(n));
+//			var v1 = parseElems(pair.right.line);
+//			v1.iterator().forEachRemaining(n -> System.out.println(n));
 			System.out.println("-------------------");
-			boolean res = true;
-			if (i == 6)
-				System.out.println();
 			int compareTo = 0;
-			for (int j = 0; j < v0.size() && j < v1.size(); j++) {
-				System.out.println("cmp " + v0.get(j) + "~" + v1.get(j));
-				compareTo = v0.get(j).compareTo(v1.get(j));
+			boolean res = true;
+			for (int j = 0; j < leftJsonArray.size() && j < rightJsonArray.size(); j++) {
+				JsonElement left = leftJsonArray.get(j);
+				JsonElement right = rightJsonArray.get(j);
+				System.out.println("cmp " + left + "~" + right);
+				if (i == 7)
+					System.out.println();
+				compareTo = compare(left, right);
 				if (compareTo <= 0) {
 					System.out.println("yes");
 					res &= true;
@@ -59,30 +69,69 @@ public class twelve {
 					break;
 				}
 			}
-			if (res && v0.size() > v1.size() && !(compareTo == -10_000))
+//			boolean res = true;
+//			if (i == 6)
+//				System.out.println();
+//			int compareTo = 0;
+//			for (int j = 0; j < v0.size() && j < v1.size(); j++) {
+//				System.out.println("cmp " + v0.get(j) + "~" + v1.get(j));
+//				compareTo = v0.get(j).compareTo(v1.get(j));
+//				if (compareTo <= 0) {
+//					System.out.println("yes");
+//					res &= true;
+//				} else {
+//					System.out.println("no");
+//					res &= false;
+//					break;
+//				}
+//			}
+			if (res && leftJsonArray.size() > rightJsonArray.size())
 				res = false;
 			if (res) {
-				System.out.println("----------------?adding " + (i + 1));
-				idexList.add(i + 1);
+				System.out.println("--------------------------->    adding " + (i));
+				idexList.add(i);
 			}
 		}
+		System.out.println("Added " + idexList);
 		Optional<Integer> sum = idexList.stream().reduce((x, y) -> x + y);
 		sum.ifPresentOrElse(val -> System.out.println("Sum= " + val), () -> System.out.println("Rien"));
 		// 836 too low
 	}
 
-	private static List<Pair<Packet>> loadData(Path data) {
+	static int compare(JsonElement left, JsonElement right) {
+		int compareTo = 0;
+		if (left instanceof JsonArray && right instanceof JsonPrimitive) {
+			var val = right;
+			right = new JsonArray();
+			((JsonArray) right).add(val);
+		}
+		if (left instanceof JsonPrimitive && right instanceof JsonArray) {
+			var val = left;
+			left = new JsonArray();
+			((JsonArray) left).add(val);
+		}
+		if (left instanceof JsonArray && right instanceof JsonArray) {
+//			left=((JsonArray)left).
+			compareTo = left.toString().compareTo(right.toString());
+			TODO
+		}
+		if (left instanceof JsonPrimitive && right instanceof JsonPrimitive) {
+			compareTo = left.toString().compareTo(right.toString());
+		}
+		return compareTo;
+	}
+
+	private static List<Pair<JsonElement>> loadData(Path data) {
 		// read all Pairs in a list
-		List<Pair<Packet>> pairs = new ArrayList<>();
+		List<Pair<JsonElement>> pairs = new ArrayList<>();
 		try (BufferedReader reader = new BufferedReader(new FileReader(data.toFile()))) {
 			String text = reader.readLine();
 			while (text != null) {
-//				JSONParser
-				Packet l = new Packet(text);
+				JsonElement l = JsonParser.parseString(text);
 				// next line
 				text = reader.readLine();
-				Packet r = new Packet(text);
-				Pair<Packet> p = new Pair<>(l, r);
+				JsonElement r = JsonParser.parseString(text);
+				Pair<JsonElement> p = new Pair<>(l, r);
 				pairs.add(p);
 				text = reader.readLine();
 				if (text == null)
