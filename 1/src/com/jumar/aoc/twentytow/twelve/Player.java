@@ -3,7 +3,7 @@ package com.jumar.aoc.twentytow.twelve;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jumar.aoc.twentytwo.seven.TreeNode;
+import com.jumar.aoc.twentytow.TreeNode;
 
 public class Player {
 	public Tile pos;

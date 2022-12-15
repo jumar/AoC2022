@@ -1,6 +1,7 @@
-package com.jumar.aoc.twentytwo.seven;
+package com.jumar.aoc.twentytow;
 
 import java.util.Iterator;
+
 // I took this class from gitHub somewhere
 public class TreeNodeIter<T> implements Iterator<TreeNode<T>> {
 

@@ -9,6 +9,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.jumar.aoc.twentytow.TreeNode;
+
 public class seven {
 
 	static TreeNode<Data> root = new TreeNode<>(new Data("root"));
@@ -99,13 +101,12 @@ public class seven {
 
 		// problem: find all dirs with size < 100_000. Compute the total size of these
 		//
-		
-		// part 2: 
+
+		// part 2:
 		// available disk space 70_000_000
 		// need 30_000_000 for update
 		// find dir to delete to get enough space (8_381_165)
-		
-		
+
 		Path data = Path.of("./data/7.txt");
 //		Path data = Path.of("./data/7test.txt");
 		reader = new DataReader(data);
@@ -114,35 +115,33 @@ public class seven {
 			cmd.execute();
 			cmd = reader.readCmd();
 		}
-		//printTree();
+		// printTree();
 		computeSize();
 		printTree(); // Yay!
 		var nodes = identifySmallerThan(100_000);
-		Integer size = nodes.stream().map(n -> n.data.size).collect(Collectors.summingInt(val -> (Integer)val));
+		Integer size = nodes.stream().map(n -> n.data.size).collect(Collectors.summingInt(val -> (Integer) val));
 		System.out.println("Total size of elems with size at most 100_000: " + size);
 		int updateSpace = 30_000_000;
 		int totalSpace = 70_000_000;
 		int usedSpace = root.data.size;
-		int freeSpace = totalSpace-usedSpace;
+		int freeSpace = totalSpace - usedSpace;
 		int neededSpace = Math.abs(freeSpace - updateSpace);
 		System.out.println("Elems with size at least " + neededSpace);
 		nodes = identifyLargerThan(neededSpace);
 		Collections.sort(nodes, new Comparator<TreeNode<Data>>() {
 			@Override
 			public int compare(TreeNode<Data> o1, TreeNode<Data> o2) {
-				return ((Integer)o1.data.size).compareTo((Integer)o2.data.size);
+				return ((Integer) o1.data.size).compareTo((Integer) o2.data.size);
 			}
 		});
-		nodes.stream().filter(n -> 
-			n.data.size >= neededSpace
-		).forEach(c -> System.out.println("cc: " +c));//.collect(Collectors.toList());
+		nodes.stream().filter(n -> n.data.size >= neededSpace).forEach(c -> System.out.println("cc: " + c));// .collect(Collectors.toList());
 		// wcmwrtjn <- no
 	}
 
 	private static List<TreeNode<Data>> identifySmallerThan(int higherLimit) {
 		List<TreeNode<Data>> nodes = new ArrayList<>();
 		for (TreeNode<Data> node : root) {
-			if(node.data.size <= higherLimit&& !node.isLeaf()) { // only count the dirs
+			if (node.data.size <= higherLimit && !node.isLeaf()) { // only count the dirs
 				nodes.add(node);
 			}
 		}
@@ -152,35 +151,35 @@ public class seven {
 	private static List<TreeNode<Data>> identifyLargerThan(int higherLimit) {
 		List<TreeNode<Data>> nodes = new ArrayList<>();
 		for (TreeNode<Data> node : root) {
-			if(node.data.size >= higherLimit&& !node.isLeaf()) { // only count the dirs
+			if (node.data.size >= higherLimit && !node.isLeaf()) { // only count the dirs
 				nodes.add(node);
 			}
 		}
 		return nodes;
 	}
-	
+
 	private static void computeSize() {
 		for (TreeNode<Data> node : root) {
-			if(node.isLeaf()) {
+			if (node.isLeaf()) {
 				// either a file or an empty dir
 				int nodeSize = node.data.size;
-				if(nodeSize!=Data.UNKNOWN_SIZE) {
+				if (nodeSize != Data.UNKNOWN_SIZE) {
 					// it's a file we already have its size
 					// lets propagate its size to its parents
-					propagateSizeToParents(node, nodeSize); 
+					propagateSizeToParents(node, nodeSize);
 				}
 			} else {
 				// it's a non empty dir
 				// do nothing
 			}
-			//System.out.println(indent + node.data);
+			// System.out.println(indent + node.data);
 		}
-		
+
 	}
 
 	private static void propagateSizeToParents(TreeNode<Data> node, int nodeSize) {
 		node.parent.data.size += nodeSize;
-		if(!node.parent.isRoot())
+		if (!node.parent.isRoot())
 			propagateSizeToParents(node.parent, nodeSize);
 	}
 
