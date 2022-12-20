@@ -1,15 +1,30 @@
 package com.github.jumar.aoc2022.fourteen;
 
+import com.github.jumar.aoc2022.fourteen.CaveTile.enTileType;
+
 public class Sand {
-	Point loc = new Point("500,0");
+	Point pos = new Point(500 - Point.xoffset, 0);
 	Point temp = new Point("0,0");
+	public boolean isAtRest;
+
+	public Sand() {
+	}
+
+	public Sand(Point pos) {
+		this.pos.set(pos);
+	}
+
+	@Override
+	public String toString() {
+		return pos.toString() + (isAtRest ? "R" : "");
+	}
 
 	public void moveDown() {
-		loc.moveDown();
+		pos.moveDown();
 	}
 
 	public Point tryMoveDown() {
-		temp.set(loc);
+		temp.set(pos);
 		temp.moveDown();
 		return temp;
 	}
@@ -19,8 +34,8 @@ public class Sand {
 		moveRight();
 	}
 
-	public Point trymoveDownRight() {
-		temp.set(loc);
+	public Point tryMoveDownRight() {
+		temp.set(pos);
 		temp.moveDownRight();
 		return temp;
 	}
@@ -30,37 +45,65 @@ public class Sand {
 		moveLeft();
 	}
 
-	public Point trymoveDownLeft() {
-		temp.set(loc);
+	public Point tryMoveDownLeft() {
+		temp.set(pos);
 		temp.moveDownLeft();
 		return temp;
 	}
 
 	private void moveRight() {
-		loc.moveRight();
+		pos.moveRight();
 	}
 
 	public Point trymoveRight() {
-		temp.set(loc);
+		temp.set(pos);
 		temp.moveRight();
 		return temp;
 	}
 
 	private void moveLeft() {
-		loc.moveLeft();
+		pos.moveLeft();
 	}
 
 	public Point trymoveLef() {
-		temp.set(loc);
+		temp.set(pos);
 		temp.moveLeft();
 		return temp;
 	}
+
 //	public boolean isNeighbor(Sand other) {
 //		return Math.abs(other.loc.x - loc.x) < 2 && Math.abs(other.loc.y - loc.y) < 2;
 //	}
-
-	public void fall() {
-		// TODO Auto-generated method stub
-
+	/**
+	 * 
+	 * @param cave
+	 * @return true if it falled down. false if it's at rest
+	 */
+	public boolean fall(CaveTile[][] cave) {
+		var down = tryMoveDown();
+//		if (down.y >= cave[0].length) {
+//			System.out.println("free fall! Yay!!");
+//			return true;
+//		}
+		if (down.y >= Fourteen.maxDepth + 1) {
+			System.out.println("reached cave floor");
+			isAtRest = true;
+		}
+		if (cave[down.y][down.x].type == enTileType.empty)
+			moveDown();
+		else {
+			down = tryMoveDownLeft();
+			if (cave[down.y][down.x].type == enTileType.empty)
+				moveDownLeft();
+			else {
+				down = tryMoveDownRight();
+				if (cave[down.y][down.x].type == enTileType.empty)
+					moveDownRight();
+				else {// rest
+					isAtRest = true;
+				}
+			}
+		}
+		return !isAtRest;
 	}
 }
