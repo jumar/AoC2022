@@ -1,11 +1,9 @@
 package com.github.jumar.aoc2022.fifteen;
 
-import java.awt.Point;
-
 public class Beacon {
-	Point pos;
+	Pointf pos;
 
-	public Beacon(Point p) {
+	public Beacon(Pointf p) {
 		pos = p;
 	}
 }
