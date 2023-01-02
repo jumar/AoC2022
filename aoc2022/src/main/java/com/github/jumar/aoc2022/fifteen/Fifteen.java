@@ -1,5 +1,6 @@
 package com.github.jumar.aoc2022.fifteen;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +14,7 @@ import processing.core.PImage;
 public class Fifteen extends PApplet {
 	// Defining the image
 	PImage img;
-	List<List<Pointf>> lines = new ArrayList<>();
+	List<List<Point>> lines = new ArrayList<>();
 	List<Sensor> sensors = new ArrayList<>();
 	public static final int size_w = 30;
 	public static final int size_h = 30;
@@ -25,7 +26,7 @@ public class Fifteen extends PApplet {
 	private int maxBX;
 	private int minBY;
 	private int maxBY;
-	private boolean debug = false;
+	private boolean debug = true;
 
 	private static int factor = 16;
 
@@ -51,9 +52,9 @@ public class Fifteen extends PApplet {
 		String cc = line.substring(line.indexOf("closest beacon is at x=")).split("y=")[1];
 
 		int beaconY = Integer.parseInt(cc);
-		Pointf bPos = new Pointf(beaconX, beaconY);
+		Point bPos = new Point(beaconX, beaconY);
 		Beacon b = new Beacon(bPos);
-		var sPos = new Pointf(sensorX, sensorY);
+		var sPos = new Point(sensorX, sensorY);
 		Sensor s = new Sensor(b, sPos, computeDist(sPos, b.pos));
 		return s;
 	}
@@ -66,8 +67,8 @@ public class Fifteen extends PApplet {
 		background(255);
 		// Set the pen color
 		// stroke(0);
-		String[] lineArray = loadStrings("data/15.txt");
-//		String[] lineArray = loadStrings("data/15test.txt");
+//		String[] lineArray = loadStrings("data/15.txt");
+		String[] lineArray = loadStrings("data/15test.txt");
 		minX = minBX = Integer.MAX_VALUE;
 		maxX = maxBX = Integer.MIN_VALUE;
 		minY = minBY = Integer.MAX_VALUE;
@@ -112,11 +113,11 @@ public class Fifteen extends PApplet {
 		// for each point P of the line
 		// search for Sensors which dist to closest B is < than dist between P and S
 		// if found -> cannot be a B here
-		int rowOfInterest = 2000000;
-//		int rowOfInterest = 10;
+//		int rowOfInterest = 2000000;
+		int rowOfInterest = 10;
 		// minBY = maxBY = rowOfInterest;
 		Map<Integer, Integer> nbPosThatCannotBeBeaconsMap = new HashMap<>();
-		Pointf p = new Pointf(0, 0);
+		Point p = new Point(0, 0);
 		// for each point P of the line
 		int nbPosThatCannotBeBeacons = 0;
 		if (debug)
@@ -185,7 +186,7 @@ public class Fifteen extends PApplet {
 		// 1. for each position, check if inside all the beacons polygons
 		boolean inSensorReach = false;
 		minBY = minBX = 0;
-		maxBY = maxBX = 4_000_000;
+		maxBY = maxBX = 20;// 4_000_000;
 		for (int r = minBY; r <= maxBY; r++) {
 			for (int c = minBX; c <= maxBX; c++) {
 				inSensorReach = false;
@@ -193,7 +194,7 @@ public class Fifteen extends PApplet {
 				if (c == 14 && r == 11)
 					System.out.println("");
 				for (int i = 0; i < sensors.size(); i++) {
-					if (isPointfInPolygon(p, sensors.get(i).poly)) {
+					if (isPointInPolygon(p, sensors.get(i).poly)) {
 						inSensorReach = true;
 						break;
 					}
@@ -209,13 +210,13 @@ public class Fifteen extends PApplet {
 		super.setup();
 	}
 
-	public boolean isPointfInPolygon(Pointf p, Pointf[] polygon) {
+	public boolean isPointInPolygon(Point p, Point[] polygon) {
 		double minX = polygon[0].x;
 		double maxX = polygon[0].x;
 		double minY = polygon[0].y;
 		double maxY = polygon[0].y;
 		for (int i = 1; i < polygon.length; i++) {
-			Pointf q = polygon[i];
+			Point q = polygon[i];
 			minX = Math.min(q.x, minX);
 			maxX = Math.max(q.x, maxX);
 			minY = Math.min(q.y, minY);
@@ -239,7 +240,7 @@ public class Fifteen extends PApplet {
 		return inside;
 	}
 
-	private boolean canBeaconNotBePresent(Pointf p) {
+	private boolean canBeaconNotBePresent(Point p) {
 		boolean[] b = new boolean[] { false };
 		// search for Sensors which dist to closest B is < than dist between P and S
 		sensors.forEach(s -> {
@@ -252,7 +253,7 @@ public class Fifteen extends PApplet {
 		return b[0];
 	}
 
-	private float computeDist(Pointf p, Pointf pp) {
+	private int computeDist(Point p, Point pp) {
 		return Math.abs(pp.x - p.x) + Math.abs(pp.y - p.y);
 	}
 
@@ -272,7 +273,7 @@ public class Fifteen extends PApplet {
 		strokeWeight(1);
 		for (int r = minY; r <= maxY; r++) {
 			for (int c = minX; c <= maxX; c++) {
-				Pointf p = new Pointf(c, r);
+				Point p = new Point(c, r);
 				boolean found = false;
 				for (int i = 0; i < sensors.size(); i++) {
 					if (sensors.get(i).pos.equals(p)) {
@@ -293,7 +294,7 @@ public class Fifteen extends PApplet {
 		}
 		for (int r = minY; r <= maxY; r++) {
 			for (int c = minX; c <= maxX; c++) {
-				Pointf p = new Pointf(c, r);
+				Point p = new Point(c, r);
 				for (int i = 0; i < sensors.size(); i++) {
 					if (sensors.get(i).pos.equals(p)) {
 //						System.out.print("S");
@@ -312,7 +313,7 @@ public class Fifteen extends PApplet {
 		}
 		for (int r = minY; r <= maxY; r++) {
 			for (int c = minX; c <= maxX; c++) {
-				Pointf p = new Pointf(c, r);
+				Point p = new Point(c, r);
 				for (int i = 0; i < sensors.size(); i++) {
 					if (sensors.get(i).pos.equals(p)) {
 //						System.out.print("S");
@@ -331,7 +332,7 @@ public class Fifteen extends PApplet {
 	private void printCave() {
 		for (int r = minY; r <= maxY; r++) {
 			for (int c = minX; c <= maxX; c++) {
-				Pointf p = new Pointf(c, r);
+				Point p = new Point(c, r);
 				boolean found = false;
 				for (int i = 0; i < sensors.size(); i++) {
 					if (sensors.get(i).pos.equals(p)) {

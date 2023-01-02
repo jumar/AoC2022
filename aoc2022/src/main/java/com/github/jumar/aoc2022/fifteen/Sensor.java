@@ -1,26 +1,28 @@
 package com.github.jumar.aoc2022.fifteen;
 
+import java.awt.Point;
+
 public class Sensor {
 	Beacon closestBeacon;
-	Pointf pos;
-	float distToClosestBeacon;
-	Pointf[] poly;
+	Point pos;
+	int distToClosestBeacon;
+	Point[] poly;
 
-	public Sensor(Beacon b, Pointf point, float f) {
+	public Sensor(Beacon b, Point point, int f) {
 		closestBeacon = b;
 		pos = point;
 		distToClosestBeacon = f;
 		poly = buildPolygon();
 	}
 
-	public Pointf[] buildPolygon() {
-		Pointf[] poly = new Pointf[4];
+	public Point[] buildPolygon() {
+		Point[] poly = new Point[4];
 		var len = distToClosestBeacon;
 		var center = pos;
-		poly[0] = new Pointf(center.x - len - 0.05f, center.y);
-		poly[1] = new Pointf(center.x, center.y - len - 0.05f);
-		poly[2] = new Pointf(center.x + len + 0.05f, center.y);
-		poly[3] = new Pointf(center.x, center.y + len + 0.05f);
+		poly[0] = new Point(center.x - len, center.y);
+		poly[1] = new Point(center.x, center.y - len);
+		poly[2] = new Point(center.x + len, center.y);
+		poly[3] = new Point(center.x, center.y + len);
 		return poly;
 	}
 }
